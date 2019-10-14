@@ -3,7 +3,17 @@ import {View, Text} from 'react-native';
 
 class SettingsScreen extends React.Component {
   render() {
-    return <Text>Settings</Text>;
+    return (
+      <Text
+        style={{
+          color: '#f2f2f2',
+          fontSize: 30,
+          padding: 10,
+          paddingLeft: 20,
+        }}>
+        Settings
+      </Text>
+    );
   }
 }
 

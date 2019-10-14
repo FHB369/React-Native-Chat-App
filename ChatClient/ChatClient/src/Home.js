@@ -14,7 +14,7 @@ const TabNavigator = createMaterialTopTabNavigator(
       screen: ChatsScreen,
       navigationOptions: {
         tabBarIcon: ({tintColor}) => (
-          <Icon name="ios-chatboxes" color={tintColor} size={30} />
+          <Icon name="ios-chatboxes" color={tintColor} size={28} />
         ),
       },
     },
@@ -22,7 +22,7 @@ const TabNavigator = createMaterialTopTabNavigator(
       screen: PeoplesScreen,
       navigationOptions: {
         tabBarIcon: ({tintColor}) => (
-          <Icon name="ios-contacts" color={tintColor} size={30} />
+          <Icon name="ios-contacts" color={tintColor} size={28} />
         ),
       },
     },
@@ -30,7 +30,7 @@ const TabNavigator = createMaterialTopTabNavigator(
       screen: SettingsScreen,
       navigationOptions: {
         tabBarIcon: ({tintColor}) => (
-          <Icon name="ios-switch" color={tintColor} size={30} />
+          <Icon name="ios-switch" color={tintColor} size={28} />
         ),
       },
     },
