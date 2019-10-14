@@ -18,6 +18,7 @@ class LoginScreen extends React.Component {
         this.setState({
           visible: 0,
         });
+        this.props.navigation.navigate('Home');
       } else {
         this.setState({
           visible: 1,
@@ -61,8 +62,8 @@ class LoginScreen extends React.Component {
                   this.setState({
                     visible: 0,
                   });
-                  this.props.navigation.dispatch(this.resetAction);
                 });
+                this.props.navigation.navigate('Home');
               }
             }}
             onLogoutFinished={() => console.log('logout.')}

@@ -1,7 +1,7 @@
 import 'react-native-gesture-handler';
 import React from 'react';
 import {SafeAreaView, StatusBar} from 'react-native';
-import {createAppContainer} from 'react-navigation';
+import {createAppContainer, createSwitchNavigator} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
 import {AccessToken} from 'react-native-fbsdk';
 import {fromRight, zoomIn} from 'react-navigation-transitions';
@@ -9,7 +9,7 @@ import {fromRight, zoomIn} from 'react-navigation-transitions';
 import HomeScreen from './src/Home';
 import LoginScreen from './src/Login';
 
-const AppNavigator = createStackNavigator(
+const AppNavigator = createSwitchNavigator(
   {
     Home: HomeScreen,
     Login: LoginScreen,
@@ -17,7 +17,7 @@ const AppNavigator = createStackNavigator(
   {
     initialRouteName: 'Login',
     headerMode: 'none',
-    transitionConfig: () => fromRight(),
+    transitionConfig: () => zoomIn(),
   },
 );
 
@@ -46,7 +46,7 @@ class App extends React.Component {
     return (
       <>
         <StatusBar backgroundColor="#222" barStyle="light-content" />
-        {this.state.loginStatus ? <HomeScreen /> : <Auth />}
+        <Auth />
       </>
     );
   }

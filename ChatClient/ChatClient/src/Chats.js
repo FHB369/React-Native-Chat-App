@@ -21,7 +21,7 @@ class ChatsScreen extends React.Component {
             style={{
               paddingHorizontal: '7%',
               marginBottom: '18%',
-              paddingBottom: '2%',
+              paddingBottom: '1.5%',
             }}>
             {[...Array(10)].map((x, i) => (
               <View
@@ -29,8 +29,7 @@ class ChatsScreen extends React.Component {
                   flex: 2,
                   flexDirection: 'row',
                   marginVertical: '2%',
-                  padding: '4%',
-                  backgroundColor: '#333',
+                  paddingVertical: '4%',
                   borderRadius: 10,
                 }}>
                 <Image
