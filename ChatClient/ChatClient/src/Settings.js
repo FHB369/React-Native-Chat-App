@@ -6,10 +6,11 @@ class SettingsScreen extends React.Component {
     return (
       <Text
         style={{
-          color: '#f2f2f2',
-          fontSize: 30,
-          padding: 10,
-          paddingLeft: 20,
+          color: '#f4f4f4',
+          fontSize: 36,
+          padding: '5%',
+          paddingLeft: '10%',
+          fontFamily: 'Cairo-Regular',
         }}>
         Settings
       </Text>
