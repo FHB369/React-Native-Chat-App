@@ -8,11 +8,13 @@ import {fromRight, zoomIn} from 'react-navigation-transitions';
 
 import HomeScreen from './src/Home';
 import LoginScreen from './src/Login';
+import Messages from './src/Messages';
 
 const AppNavigator = createSwitchNavigator(
   {
     Home: HomeScreen,
     Login: LoginScreen,
+    Message: Messages,
   },
   {
     initialRouteName: 'Login',
