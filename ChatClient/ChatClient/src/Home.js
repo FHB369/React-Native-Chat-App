@@ -1,6 +1,8 @@
 import React from 'react';
 import {SafeAreaView} from 'react-native';
 import {createAppContainer} from 'react-navigation';
+import {createStackNavigator} from 'react-navigation-stack';
+import {fromRight, zoomOut, fromBottom} from 'react-navigation-transitions';
 import {createMaterialTopTabNavigator} from 'react-navigation-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
 import {GraphRequest, GraphRequestManager} from 'react-native-fbsdk';
@@ -9,6 +11,7 @@ import axios from 'axios';
 import ChatsScreen from './Chats';
 import PeoplesScreen from './Peoples';
 import SettingsScreen from './Settings';
+import Messages from './Messages';
 
 const TabNavigator = createMaterialTopTabNavigator(
   {
@@ -63,7 +66,7 @@ const TabNavigator = createMaterialTopTabNavigator(
 
 const HomeNavigator = createAppContainer(TabNavigator);
 
-class HomeScreen extends React.Component {
+class Home extends React.Component {
   constructor(props) {
     super(props);
 
@@ -116,5 +119,19 @@ class HomeScreen extends React.Component {
     );
   }
 }
+
+const LandingNavigator = createStackNavigator(
+  {
+    Landing: Home,
+    Message: Messages,
+  },
+  {
+    initialRouteName: 'Landing',
+    headerMode: 'none',
+    transitionConfig: () => fromBottom(),
+  },
+);
+
+const HomeScreen = createAppContainer(LandingNavigator);
 
 export default HomeScreen;

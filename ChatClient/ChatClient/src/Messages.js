@@ -1,6 +1,5 @@
 import React from 'react';
 import {View, StatusBar} from 'react-native';
-import {Header} from 'react-native-elements';
 import {GiftedChat, Bubble, InputToolbar, Send} from 'react-native-gifted-chat';
 import Icon from 'react-native-vector-icons/Ionicons';
 
@@ -41,8 +40,21 @@ class Messages extends React.Component {
           marginHorizontal: 10,
           borderRadius: 80,
         }}
-        textStyle={{
-          color: '#fff',
+        textInputProps={{
+          style: {
+            color: '#fff',
+            flex: 1,
+            alignItems: 'center',
+            paddingHorizontal: 20,
+          },
+          multiline: false,
+          returnKeyType: 'go',
+          onSubmitEditing: () => {
+            if (props.text && props.onSend) {
+              let text = props.text;
+              props.onSend({text: text.trim()}, true);
+            }
+          },
         }}
       />
     );
@@ -56,7 +68,7 @@ class Messages extends React.Component {
           style={{
             color: '#46CF76',
             marginRight: '0%',
-            marginBottom: '20%',
+            marginBottom: '30%',
           }}
           size={32}
         />
@@ -106,7 +118,6 @@ class Messages extends React.Component {
               },
             }}
             renderUsernameOnMessage={true}
-            isAnimated={true}
             alwaysShowSend={true}
             messages={this.state.messages}
             renderBubble={this.renderBubble}
