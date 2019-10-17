@@ -26,7 +26,7 @@ class SettingsScreen extends React.Component {
         if (error) {
           console.log('Error fetching data: ' + error.toString());
         } else {
-          console.log(result);
+          // console.log(result);
           this.setState({
             userId: result.id,
             userName: result.name,

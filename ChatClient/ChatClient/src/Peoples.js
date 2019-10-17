@@ -1,7 +1,70 @@
 import React from 'react';
 import {View, Text, ScrollView, Image} from 'react-native';
+import axios from 'axios';
+import io from 'socket.io-client';
+import {GraphRequest, GraphRequestManager} from 'react-native-fbsdk';
 
 class PeoplesScreen extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      activePeoples: [],
+      inactivePeoples: [],
+    };
+  }
+
+  componentDidMount() {
+    const infoRequest = new GraphRequest(
+      '/me?fields=id,name,picture.height(480)',
+      null,
+      (error, result) => {
+        if (error) {
+          console.log('Error fetching data: ' + error.toString());
+        } else {
+          // console.log(result);
+          var self = this;
+          axios
+            .post('http://10.100.94.164:4000/login/', {
+              name: result.name,
+              id: result.id,
+              photo: result.picture.data.url,
+            })
+            .then(function(response) {
+              console.log(response.data);
+              const socket = io('http://10.100.94.164:4000', {
+                transports: ['websocket'],
+                jsonp: false,
+              });
+              socket.connect();
+              socket.on('connect', () => {
+                socket.emit('storeClientInfo', {
+                  customId: response.data.id,
+                });
+              });
+              socket.on('update', () => {
+                axios
+                  .get('http://10.100.94.164:4000/users/active')
+                  .then(response => {
+                    self.setState({
+                      activePeoples: response.data,
+                    });
+                  })
+                  .catch(error => {
+                    console.log(error);
+                  });
+              });
+            })
+            .catch(function(error) {
+              console.log(error);
+            });
+        }
+      },
+    );
+
+    new GraphRequestManager().addRequest(infoRequest).start();
+  }
+
   render() {
     return (
       <View>
@@ -22,7 +85,7 @@ class PeoplesScreen extends React.Component {
               marginBottom: '18%',
               paddingBottom: '1.5%',
             }}>
-            {[...Array(6)].map((x, i) => (
+            {this.state.activePeoples.map(active => (
               <View
                 style={{
                   flex: 2,
@@ -33,8 +96,7 @@ class PeoplesScreen extends React.Component {
                 }}>
                 <Image
                   source={{
-                    uri:
-                      'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+                    uri: active.photo,
                   }}
                   style={{
                     width: 40,
@@ -70,7 +132,7 @@ class PeoplesScreen extends React.Component {
                       fontFamily: 'Cairo-SemiBold',
                       color: '#f2f2f2',
                     }}>
-                    Name
+                    {active.name}
                   </Text>
                 </View>
               </View>

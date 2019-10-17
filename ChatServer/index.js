@@ -59,8 +59,54 @@ app.get("/find/:id", (req, res) => {
   });
 });
 
+app.get("/users/active", (req, res) => {
+  const users = User.find({ isActive: true });
+  users.exec().then(data => {
+    res.json(data);
+  });
+});
+
+app.get("/users/inactive", (req, res) => {
+  const users = User.find({ isActive: false });
+  users.exec().then(data => {
+    res.json(data);
+  });
+});
+
+var clients = [];
+
 io.on("connection", socket => {
-  console.log("New client connected");
+  console.log("New User Connected");
+  socket.on("storeClientInfo", function(data) {
+    console.log(data.customId + " Connected");
+    var clientInfo = new Object();
+    clientInfo.customId = data.customId;
+    clientInfo.clientId = socket.id;
+    clients.push(clientInfo);
+    const res = User.updateOne({ id: data.customId }, { isActive: true });
+    res.exec().then(() => {
+      console.log("Activated " + data.customId);
+      socket.emit("update", "Updated");
+      console.log("emmited");
+    });
+  });
+
+  socket.on("disconnect", function(data) {
+    for (var i = 0, len = clients.length; i < len; ++i) {
+      var c = clients[i];
+
+      if (c.clientId == socket.id) {
+        clients.splice(i, 1);
+        console.log(c.customId + " Disconnected");
+        const res = User.updateOne({ id: c.customId }, { isActive: false });
+        res.exec().then(data => {
+          console.log("Deactivated " + c.customId);
+          socket.emit("updateActiveList", "Updated");
+        });
+        break;
+      }
+    }
+  });
 });
 
 server.listen(port, () => console.log(`Listening on port ${port}`));

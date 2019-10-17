@@ -5,8 +5,8 @@ import {createStackNavigator} from 'react-navigation-stack';
 import {fromRight, zoomOut, fromBottom} from 'react-navigation-transitions';
 import {createMaterialTopTabNavigator} from 'react-navigation-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
-import {GraphRequest, GraphRequestManager} from 'react-native-fbsdk';
 import axios from 'axios';
+import io from 'socket.io-client';
 
 import ChatsScreen from './Chats';
 import PeoplesScreen from './Peoples';
@@ -77,39 +77,7 @@ class Home extends React.Component {
     };
   }
 
-  componentDidMount() {
-    const infoRequest = new GraphRequest(
-      '/me?fields=id,name,picture.height(480)',
-      null,
-      (error, result) => {
-        if (error) {
-          console.log('Error fetching data: ' + error.toString());
-        } else {
-          // console.log(result);
-          var self = this;
-          axios
-            .post('http://192.168.0.103:3000/login', {
-              name: result.name,
-              id: result.id,
-              photo: result.picture.data.url,
-            })
-            .then(function(response) {
-              // console.log(response.data);
-              self.setState({
-                userName: response.data.name,
-                userId: response.data.id,
-                userPhotoUrl: response.data.photo,
-              });
-            })
-            .catch(function(error) {
-              console.log(error);
-            });
-        }
-      },
-    );
-
-    new GraphRequestManager().addRequest(infoRequest).start();
-  }
+  componentDidMount() {}
 
   render() {
     return (
@@ -128,7 +96,7 @@ const LandingNavigator = createStackNavigator(
   {
     initialRouteName: 'Landing',
     headerMode: 'none',
-    transitionConfig: () => fromBottom(),
+    transitionConfig: () => fromRight(),
   },
 );
 
