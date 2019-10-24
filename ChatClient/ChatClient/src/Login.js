@@ -1,5 +1,9 @@
+/* eslint-disable react-native/no-inline-styles */
+/** Login Screen of the app */
+
+//importing libraries
 import React from 'react';
-import {View, SafeAreaView} from 'react-native';
+import {View, SafeAreaView, Text} from 'react-native';
 import {LoginButton, AccessToken} from 'react-native-fbsdk';
 import {StackActions, NavigationActions} from 'react-navigation';
 
@@ -13,11 +17,13 @@ class LoginScreen extends React.Component {
   }
 
   componentDidMount() {
+    //checking if the user is already logged in
     AccessToken.getCurrentAccessToken().then(data => {
       if (data !== null) {
         this.setState({
           visible: 0,
         });
+        //divert to home
         this.props.navigation.navigate('Home');
       } else {
         this.setState({
@@ -27,6 +33,7 @@ class LoginScreen extends React.Component {
     });
   }
 
+  //reset navigation stack
   resetAction = StackActions.reset({
     index: 0,
     actions: [
@@ -43,14 +50,27 @@ class LoginScreen extends React.Component {
           style={{
             flex: 1,
             alignContent: 'stretch',
-            justifyContent: 'center',
+            justifyContent: 'space-between',
             opacity: this.state.visible,
           }}>
+          <Text
+            style={{
+              width: '100%',
+              color: '#46CF76',
+              fontSize: 122,
+              textAlign: 'center',
+              fontFamily: 'Cairo-SemiBold',
+              marginTop: '20%',
+              opacity: 0.8,
+            }}>
+            #Chats
+          </Text>
           <LoginButton
             style={{
               width: '70%',
               height: '4%',
               marginHorizontal: '15%',
+              marginBottom: '30%',
             }}
             onLoginFinished={(error, result) => {
               if (error) {

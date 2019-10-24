@@ -1,18 +1,25 @@
+/** Home Screen of the app */
+
+//importing libraries
 import React from 'react';
-import {SafeAreaView} from 'react-native';
+import {SafeAreaView, ActivityIndicator} from 'react-native';
 import {createAppContainer} from 'react-navigation';
 import {createStackNavigator} from 'react-navigation-stack';
-import {fromRight, zoomOut, fromBottom} from 'react-navigation-transitions';
+import {fromRight, zoomIn, fromBottom} from 'react-navigation-transitions';
 import {createMaterialTopTabNavigator} from 'react-navigation-tabs';
 import Icon from 'react-native-vector-icons/Ionicons';
 import axios from 'axios';
 import io from 'socket.io-client';
+import {GraphRequest, GraphRequestManager} from 'react-native-fbsdk';
 
+//importing screens
 import ChatsScreen from './Chats';
 import PeoplesScreen from './Peoples';
 import SettingsScreen from './Settings';
 import Messages from './Messages';
+import Broadcast from './Broadcast';
 
+//create a tab navigator for homescreen
 const TabNavigator = createMaterialTopTabNavigator(
   {
     Chats: {
@@ -70,36 +77,87 @@ class Home extends React.Component {
   constructor(props) {
     super(props);
 
-    this.state = {
-      userName: '',
-      userId: '',
-      userPhotoUrl: '',
-    };
+    this.state = {userName: '', userId: '', userPhotoUrl: ''};
   }
 
-  componentDidMount() {}
+  componentWillMount() {
+    // console.log(this.props.screenProps.homeNavigation);
+    //retrieve informations from Facebook
+    const infoRequest = new GraphRequest(
+      '/me?fields=id,name,picture.height(480)',
+      null,
+      (error, result) => {
+        if (error) {
+          console.log('Error fetching data: ' + error.toString());
+        } else {
+          var self = this;
+          //login user
+          axios
+            .post('https://frozen-citadel-48963.herokuapp.com' + '/login/', {
+              name: result.name,
+              id: result.id,
+              photo: result.picture.data.url,
+            })
+            .then(async function(response) {
+              await self.setState({
+                userId: response.data.id,
+                userName: response.data.name,
+                userPhotoUrl: response.data.photo,
+              });
+            })
+            .catch(function(error) {
+              console.log(error);
+            });
+        }
+      },
+    );
+
+    new GraphRequestManager().addRequest(infoRequest).start();
+  }
 
   render() {
     return (
       <SafeAreaView style={{flex: 1, backgroundColor: '#222'}}>
-        <HomeNavigator screenProps={{rootNavigation: this.props.navigation}} />
+        {this.state.userId ? (
+          <HomeNavigator
+            screenProps={{
+              rootNavigation: this.props.screenProps.homeNavigation,
+              homeNavigation: this.props.navigation,
+              user: this.state.userId,
+              userName: this.state.userName,
+              userPhoto: this.state.userPhotoUrl,
+            }}
+          />
+        ) : (
+          <ActivityIndicator size="large" color="#46CF76" style={{flex: 1}} />
+        )}
       </SafeAreaView>
     );
   }
 }
 
+//Create a navigator to go to message screen from home
 const LandingNavigator = createStackNavigator(
   {
     Landing: Home,
     Message: Messages,
+    Broadcast: Broadcast,
   },
   {
     initialRouteName: 'Landing',
     headerMode: 'none',
-    transitionConfig: () => fromRight(),
+    transitionConfig: () => zoomIn(),
   },
 );
 
-const HomeScreen = createAppContainer(LandingNavigator);
+const HomeMessageNav = createAppContainer(LandingNavigator);
+
+class HomeScreen extends React.Component {
+  render() {
+    return (
+      <HomeMessageNav screenProps={{homeNavigation: this.props.navigation}} />
+    );
+  }
+}
 
 export default HomeScreen;

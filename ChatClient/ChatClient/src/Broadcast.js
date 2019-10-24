@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-/** Message screen for chatroom messages */
+/** Messages screen for broadcast messages */
 
 //importing libraries
 import React from 'react';
@@ -23,7 +23,7 @@ import ImagePicker from 'react-native-image-picker';
 import axios from 'axios';
 import io from 'socket.io-client';
 
-class Messages extends React.Component {
+class Broadcast extends React.Component {
   constructor(props) {
     super(props);
 
@@ -31,7 +31,6 @@ class Messages extends React.Component {
       userId: '',
       userName: '',
       userPhoto: '',
-      recieverId: '',
       messages: [],
     };
   }
@@ -50,15 +49,12 @@ class Messages extends React.Component {
           right: {
             backgroundColor: '#46CF76',
           },
-          left: {
-            backfroundColor: '#aaa',
-          },
         }}
       />
     );
   };
 
-  //syling input bar
+  //styling input bar
   renderInputToolbar = props => {
     return (
       <>
@@ -127,7 +123,7 @@ class Messages extends React.Component {
     );
   };
 
-  //choose photo fromgallery or camera
+  //choose photo from gallery or camera
   handleChoosePhoto = () => {
     const options = {
       noData: true,
@@ -160,7 +156,7 @@ class Messages extends React.Component {
         formData.append('image', source.uri);
         ToastAndroid.show('Uploading...', ToastAndroid.LONG);
 
-        //upload to imgur
+        //upload image to imgur
         axios
           .post('https://api.imgur.com/3/image', formData, axiosConfig)
           .then(res => {
@@ -183,6 +179,7 @@ class Messages extends React.Component {
                 },
               ];
 
+              //send image
               this.onSend(imageMsg);
               imageMsg = [];
             } else {
@@ -197,7 +194,7 @@ class Messages extends React.Component {
   };
 
   componentDidMount() {
-    //handle physical back press
+    //handling physical back press
     this.backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       this.handleBackPress,
@@ -207,13 +204,12 @@ class Messages extends React.Component {
       userId: this.props.navigation.getParam('senderId', ''),
       userName: this.props.navigation.getParam('senderName', ''),
       userPhoto: this.props.navigation.getParam('senderPhoto', ''),
-      recieverId: this.props.navigation.getParam('userId', ''),
     });
 
     //get previous messages
     this.getMessages();
 
-    //initializing socket connectios
+    //initializing sockets
     this.socket = io('https://frozen-citadel-48963.herokuapp.com/chatsocket');
     this.socket.connect();
     this.socket.on('incommingMessage', () => {
@@ -225,15 +221,12 @@ class Messages extends React.Component {
   getMessages = async () => {
     try {
       let response = await axios.get(
-        'https://frozen-citadel-48963.herokuapp.com' +
-          '/chats/' +
-          this.props.navigation.getParam('senderId', '') +
-          '/' +
-          this.props.navigation.getParam('userId', ''),
+        'https://frozen-citadel-48963.herokuapp.com' + '/broadcast',
       );
       if (response.status === 200) {
+        let broadcasts = response.data.reverse();
         this.setState(previousState => ({
-          messages: GiftedChat.append([], response.data),
+          messages: GiftedChat.append([], broadcasts),
         }));
       }
     } catch (error) {
@@ -259,15 +252,11 @@ class Messages extends React.Component {
 
     //notify new message
     this.socket.emit('newMessage', 'sent');
-
+    // console.log(messages[0]);
     try {
-      let formData = {
-        sender: this.state.userId,
-        reciever: this.state.recieverId,
-        messages: this.state.messages,
-      };
+      let formData = messages[0];
       let response = await axios.post(
-        'https://frozen-citadel-48963.herokuapp.com' + '/chats/',
+        'https://frozen-citadel-48963.herokuapp.com' + '/broadcast/',
         formData,
       );
       if (response.status === 200) {
@@ -315,7 +304,7 @@ class Messages extends React.Component {
                 color: '#f2f2f2',
                 textAlign: 'center',
               }}>
-              {navigation.getParam('userName', '')}
+              Broadcast
             </Text>
             <Icon name="ios-home" size={32} style={{opacity: 0, flex: 1}} />
           </View>
@@ -325,6 +314,7 @@ class Messages extends React.Component {
                 backgroundColor: '#222',
               },
             }}
+            renderUsernameOnMessage={true}
             alwaysShowSend={true}
             messages={this.state.messages}
             renderBubble={this.renderBubble}
@@ -349,4 +339,4 @@ class Messages extends React.Component {
   }
 }
 
-export default Messages;
+export default Broadcast;

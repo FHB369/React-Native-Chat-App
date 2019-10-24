@@ -6,15 +6,15 @@ import {createStackNavigator} from 'react-navigation-stack';
 import {AccessToken} from 'react-native-fbsdk';
 import {fromRight, zoomIn} from 'react-navigation-transitions';
 
+//import screens
 import HomeScreen from './src/Home';
 import LoginScreen from './src/Login';
-import Messages from './src/Messages';
 
+//create a navigator for authentication flow
 const AppNavigator = createSwitchNavigator(
   {
     Home: HomeScreen,
     Login: LoginScreen,
-    Message: Messages,
   },
   {
     initialRouteName: 'Login',
@@ -35,6 +35,7 @@ class App extends React.Component {
   }
 
   componentDidMount() {
+    //Check current login status
     AccessToken.getCurrentAccessToken().then(data => {
       if (data !== null) {
         this.setState({

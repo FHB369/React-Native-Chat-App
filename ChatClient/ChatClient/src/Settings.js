@@ -1,3 +1,7 @@
+/* eslint-disable react-native/no-inline-styles */
+/** Settings tab in Homescreen */
+
+//importing libraries
 import React from 'react';
 import {View, Text, Image, Switch, TouchableOpacity} from 'react-native';
 import {
@@ -6,6 +10,7 @@ import {
   GraphRequestManager,
 } from 'react-native-fbsdk';
 import {StackActions, NavigationActions} from 'react-navigation';
+import io from 'socket.io-client';
 
 class SettingsScreen extends React.Component {
   constructor(props) {
@@ -19,6 +24,7 @@ class SettingsScreen extends React.Component {
   }
 
   componentDidMount() {
+    //getting user info from facebook
     const infoRequest = new GraphRequest(
       '/me?fields=id,name,picture.height(480)',
       null,
@@ -132,27 +138,18 @@ class SettingsScreen extends React.Component {
               marginLeft: '7%',
               fontSize: 22,
               fontFamily: 'Cairo-SemiBold',
-              color: '#ccc',
+              color: '#555',
               paddingVertical: '3%',
             }}>
-            Dark Theme
+            Set server address
           </Text>
-          <Switch
-            style={{
-              position: 'absolute',
-              alignSelf: 'flex-end',
-              paddingVertical: '5%',
-              right: '5%',
-            }}
-            value={true}
-          />
         </View>
         <View>
           <TouchableOpacity
             onPress={() => {
               LoginManager.logOut();
               this.props.screenProps.rootNavigation.navigate('Login');
-              // console.log(this.props);
+              // console.log(this.props.screenProps);
             }}>
             <Text
               style={{

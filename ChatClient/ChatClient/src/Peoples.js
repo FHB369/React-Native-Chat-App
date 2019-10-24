@@ -1,68 +1,79 @@
+/* eslint-disable react-native/no-inline-styles */
+/** Active peoples tab in Home Screen */
+
+//importing libraries
 import React from 'react';
-import {View, Text, ScrollView, Image} from 'react-native';
+import {View, Text, ScrollView, Image, TouchableOpacity} from 'react-native';
 import axios from 'axios';
 import io from 'socket.io-client';
-import {GraphRequest, GraphRequestManager} from 'react-native-fbsdk';
 
 class PeoplesScreen extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
+      userId: '',
+      userName: '',
+      userPhoto: '',
       activePeoples: [],
       inactivePeoples: [],
     };
   }
 
   componentDidMount() {
-    const infoRequest = new GraphRequest(
-      '/me?fields=id,name,picture.height(480)',
-      null,
-      (error, result) => {
-        if (error) {
-          console.log('Error fetching data: ' + error.toString());
-        } else {
-          // console.log(result);
-          var self = this;
-          axios
-            .post('http://10.100.94.164:4000/login/', {
-              name: result.name,
-              id: result.id,
-              photo: result.picture.data.url,
-            })
-            .then(function(response) {
-              console.log(response.data);
-              const socket = io('http://10.100.94.164:4000', {
-                transports: ['websocket'],
-                jsonp: false,
-              });
-              socket.connect();
-              socket.on('connect', () => {
-                socket.emit('storeClientInfo', {
-                  customId: response.data.id,
-                });
-              });
-              socket.on('update', () => {
-                axios
-                  .get('http://10.100.94.164:4000/users/active')
-                  .then(response => {
-                    self.setState({
-                      activePeoples: response.data,
-                    });
-                  })
-                  .catch(error => {
-                    console.log(error);
-                  });
-              });
-            })
-            .catch(function(error) {
-              console.log(error);
-            });
-        }
-      },
-    );
+    //get current user's info from props
+    this.setState({
+      userId: this.props.screenProps.user,
+      userName: this.props.screenProps.userName,
+      userPhoto: this.props.screenProps.userPhoto,
+    });
 
-    new GraphRequestManager().addRequest(infoRequest).start();
+    //initialize the sockets
+    this.socket = io('https://frozen-citadel-48963.herokuapp.com');
+    this.socket.connect();
+    this.socket.on('connect', () => {
+      //notify new user
+      this.socket.emit('storeClientInfo', {
+        customId: this.props.screenProps.user,
+      });
+      axios
+        .get('https://frozen-citadel-48963.herokuapp.com' + '/users/active')
+        .then(response => {
+          let actives = [];
+          for (var i = 0; i < response.data.length; i++) {
+            if (response.data[i].id == this.state.userId) {
+            } else {
+              actives.push(response.data[i]);
+            }
+          }
+          this.setState({
+            activePeoples: actives,
+          });
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    });
+    this.socket.on('update', () => {
+      console.log('Ceeeeeeeeeeee');
+      axios
+        .get('https://frozen-citadel-48963.herokuapp.com' + '/users/active')
+        .then(response => {
+          let actives = [];
+          for (var i = 0; i < response.data.length; i++) {
+            if (response.data[i].id == this.state.userId) {
+            } else {
+              actives.push(response.data[i]);
+            }
+          }
+          this.setState({
+            activePeoples: actives,
+          });
+        })
+        .catch(error => {
+          console.log(error);
+        });
+    });
   }
 
   render() {
@@ -86,56 +97,69 @@ class PeoplesScreen extends React.Component {
               paddingBottom: '1.5%',
             }}>
             {this.state.activePeoples.map(active => (
-              <View
-                style={{
-                  flex: 2,
-                  flexDirection: 'row',
-                  marginVertical: '2%',
-                  paddingVertical: '4%',
-                  borderRadius: 10,
+              <TouchableOpacity
+                onPress={() => {
+                  this.props.screenProps.homeNavigation.push('Message', {
+                    userName: active.name,
+                    userId: active.id,
+                    userPhoto: active.photo,
+                    senderId: this.state.userId,
+                    senderName: this.state.userName,
+                    senderPhoto: this.state.userPhoto,
+                  });
+                  // console.log(this.props);
                 }}>
-                <Image
-                  source={{
-                    uri: active.photo,
-                  }}
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: 70,
-                    borderColor: '#444',
-                    borderWidth: 2,
-                  }}
-                />
                 <View
                   style={{
-                    position: 'absolute',
-                    backgroundColor: '#46CF76',
-                    width: 15,
-                    height: 15,
-                    left: 30,
-                    top: 40,
-                    borderRadius: 100,
-                    borderColor: '#222',
-                    borderWidth: 2,
-                  }}
-                />
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: 'column',
-                    marginHorizontal: '5%',
-                    marginTop: '1%',
+                    flex: 2,
+                    flexDirection: 'row',
+                    marginVertical: '2%',
+                    paddingVertical: '4%',
+                    borderRadius: 10,
                   }}>
-                  <Text
+                  <Image
+                    source={{
+                      uri: active.photo,
+                    }}
                     style={{
-                      fontSize: 18,
-                      fontFamily: 'Cairo-SemiBold',
-                      color: '#f2f2f2',
+                      width: 40,
+                      height: 40,
+                      borderRadius: 70,
+                      borderColor: '#444',
+                      borderWidth: 2,
+                    }}
+                  />
+                  <View
+                    style={{
+                      position: 'absolute',
+                      backgroundColor: '#46CF76',
+                      width: 15,
+                      height: 15,
+                      left: 30,
+                      top: 40,
+                      borderRadius: 100,
+                      borderColor: '#222',
+                      borderWidth: 2,
+                    }}
+                  />
+                  <View
+                    style={{
+                      flex: 1,
+                      flexDirection: 'column',
+                      marginHorizontal: '5%',
+                      marginTop: '1%',
                     }}>
-                    {active.name}
-                  </Text>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontFamily: 'Cairo-SemiBold',
+                        color: '#f2f2f2',
+                      }}>
+                      {active.name}
+                    </Text>
+                  </View>
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
         </View>
